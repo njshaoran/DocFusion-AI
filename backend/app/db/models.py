@@ -1,14 +1,39 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from datetime import datetime
-from app.db.database import Base
+from .database import Base
 
 
 class Task(Base):
     __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True, index=True)
-    filename = Column(String(255), nullable=False)
-    file_path = Column(String(500), nullable=False)
-    status = Column(String(50), default="uploaded")
-    result = Column(Text, nullable=True)
+    file_name = Column(String, nullable=False)
+    file_path = Column(String, nullable=False)
+    file_type = Column(String, nullable=True)
+    status = Column(String, default="uploaded")
+    error_message = Column(String, nullable=True)
+    result = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+
+class DocumentField(Base):
+    __tablename__ = "document_fields"
+
+    id = Column(Integer, primary_key=True, index=True)
+    task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False)
+
+    # 第一版字段字典（P0）
+    doc_id = Column(String, nullable=True)
+    doc_type = Column(String, nullable=True)
+    raw_text = Column(Text, nullable=True)
+    paragraphs = Column(Text, nullable=True)   # 先用字符串保存，后面可转 JSON
+    tables = Column(Text, nullable=True)       # 先用字符串保存，后面可转 JSON
+
+    project_name = Column(String, nullable=True)
+    project_leader = Column(String, nullable=True)
+    organization_name = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)

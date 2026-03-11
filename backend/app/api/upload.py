@@ -1,41 +1,35 @@
-from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
-from sqlalchemy.orm import Session
-from app.db.database import get_db
-from app.db.models import Task
-from app.services.file_service import save_upload_file
-from app.core.logger import logger
+from fastapi import APIRouter, UploadFile, File
 import os
+import shutil
+from app.db.database import SessionLocal
+from app.db.models import Task
 
 router = APIRouter()
 
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+
 
 @router.post("/upload")
-def upload_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
-    try:
-        file_path = save_upload_file(file)
-        file_size = os.path.getsize(file_path)
+async def upload_file(file: UploadFile = File(...)):
+    file_path = os.path.join(UPLOAD_DIR, file.filename)
 
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    db = SessionLocal()
+    try:
         task = Task(
-            filename=file.filename,
+            file_name=file.filename,
             file_path=file_path,
-            status="uploaded",
-            result=None
+            file_type=file.filename.split(".")[-1] if "." in file.filename else "",
+            status="uploaded"
         )
+
         db.add(task)
         db.commit()
         db.refresh(task)
 
-        logger.info(f"文件上传成功: {file.filename}, task_id={task.id}")
-
-        return {
-            "message": "文件上传成功",
-            "task_id": task.id,
-            "filename": file.filename,
-            "file_path": file_path,
-            "file_size": file_size,
-            "status": task.status
-        }
-
-    except Exception as e:
-        logger.error(f"文件上传失败: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"文件上传失败: {str(e)}")
+        return {"task_id": task.id, "status": task.status}
+    finally:
+        db.close()
