@@ -180,3 +180,30 @@ export function sendTableData(payload) {
         }, 600);
     });
 }
+
+/**
+ * 发送抽取的字段结果
+ * @param {Object} payload
+ * @param {string} payload.fileName - 原文件名
+ * @param {Array<string>} payload.fields - 抽取的字段数组
+ * @param {string} payload.extra - 额外参数
+ * @returns {Promise<{success: boolean, message?: string}>}
+ */
+export function sendExtractedFields(payload) {
+    // ========= 未来后端对接点 =========
+    // return fetch('/api/extracted-fields', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(payload)
+    // })
+    // .then(res => res.json())
+    // .then(data => ({ success: true, ...data }))
+    // .catch(err => ({ success: false, message: err.message }));
+    // =================================
+    return new Promise(resolve => {
+        setTimeout(() => {
+            console.log('【发送抽取字段】', payload);
+            resolve({ success: true, message: '模拟发送成功' });
+        }, 500);
+    });
+}
