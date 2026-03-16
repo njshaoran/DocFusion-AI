@@ -86,3 +86,87 @@ day05
 POST /parse/{task_id}
 POST /extract/{task_id}
 因此数据库中还没有对应 DocumentField 数据，导致查询字段结果时返回 404。后续计划采用与前端沟通的“方案一”，由前端负责人在现有代码基础上补齐 parse -> extract -> fields 的完整调用链路，完成最终页面展示流程。
+
+day06
+ 一、后端接口测试
+
+今日对文档处理流程进行了完整测试，验证后端接口链路是否正常工作。
+
+当前后端接口完整流程为：
+
+/upload
+→ /parse/{task_id}
+→ /extract/{task_id}
+→ /fields/{task_id}
+
+测试过程：
+
+1. 通过 Swagger (/docs) 调用 /upload 上传测试文件
+2. 成功返回 task_id
+3. 调用 /parse/{task_id} 完成文档解析
+4. 调用 /extract/{task_id} 完成字段抽取
+5. 调用 /fields/{task_id} 成功获取字段结果
+
+测试数据示例：
+
+项目名称：智慧文档检索系统  
+项目负责人：河海大学  
+申报单位：河海大学计算机与软件学院  
+联系电话：111111111  
+
+返回字段结果：
+
+- project_name：智慧文档检索系统
+- project_leader：河海大学
+- organization_name：河海大学计算机与软件学院
+- phone：111111111
+
+说明后端解析与字段抽取功能正常。
+
+---
+
+### 二、前后端联调情况
+
+已启动前端页面进行接口联调，并通过浏览器 Network 面板观察请求情况。
+
+当前前端上传流程为：
+
+uploadFiles
+→ getTask
+→ getFields
+
+即：
+
+/upload
+→ /tasks/{task_id}
+→ /fields/{task_id}
+
+但根据后端当前设计，完整流程应为：
+
+/upload
+→ /parse/{task_id}
+→ /extract/{task_id}
+→ /fields/{task_id}
+
+因此前端目前未调用 parse 与 extract 两个接口，可能导致字段结果无法正常返回。
+
+该问题已在日志中记录，待前端补充接口调用后继续联调。
+
+---
+
+### 三、今日完成工作
+
+1. 完成后端文档解析与字段抽取流程测试
+2. 验证 upload → parse → extract → fields 接口链路
+3. 与前端页面进行初步联调
+4. 通过浏览器 Network 面板定位接口调用情况
+5. 确认前端当前缺少 parse 与 extract 调用
+
+---
+
+### 四、后续计划
+
+1. 配合前端补充 parse 与 extract 接口调用
+2. 继续完善字段抽取规则
+3. 优化接口返回结构
+4. 完成完整前后端联调测试
